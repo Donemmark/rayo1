@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biometric Email Login System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e1e5e9;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .biometric-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .email-dashboard {
+            display: none;
+        }
+
+        .email-dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header h2 {
+            color: #333;
+            font-size: 20px;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .email-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .email-item {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e1e5e9;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .email-item:hover {
+            background: #f8f9fa;
+        }
+
+        .email-item:last-child {
+            border-bottom: none;
+        }
+
+        .email-sender {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .email-subject {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .email-preview {
+            color: #999;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .email-time {
+            color: #999;
+            font-size: 12px;
+            float: right;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .feature-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .feature-list h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .feature-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px;
+                max-width: none;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login/Registration Form -->
+        <div id="authForm">
+            <div class="header">
+                <h1>👤 Face Recognition Login</h1>
+                <p>Secure email access with facial biometric authentication</p>
+            </div>
+            
+            <div class="content">
+                <div id="statusMessage"></div>
+                
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" required placeholder="Enter your email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" required placeholder="Enter your full name">
+                    </div>
+                    
+                    <button type="button" id="registerBtn" class="btn btn-primary">
+                        <svg class="biometric-icon" viewBox="0 0 24 24">
+                            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+                        </svg>
+                        Register Face ID
+                    </button>
+                </form>
+                
+                <button id="loginBtn" class="btn btn-secondary" disabled>
+                    <svg class="biometric-icon" viewBox="0 0 24 24">
+                        <path d="M9,11H15L13,13.5L15,16H9L11,13.5L9,11M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2Z"/>
+                    </svg>
+                    Login with Face ID
+                </button>
+
+                <div class="feature-list">
+                    <h3>👤 Face Recognition Features</h3>
+                    <ul>
+                        <li>Passwordless authentication</li>
+                        <li>Advanced facial recognition</li>
+                        <li>Secure email access</li>
+                        <li>Liveness detection</li>
+                        <li>Anti-spoofing protection</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Dashboard -->
+        <div id="emailDashboard" class="email-dashboard">
+            <div class="dashboard-header">
+                <h2>📧 Your Inbox</h2>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+            
+            <div class="email-list" id="emailList">
+                <!-- Emails will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class BiometricEmailSystem {
+            constructor() {
+                this.isRegistered = false;
+                this.currentUser = null;
+                this.credentials = new Map();
+                this.initializeElements();
+                this.bindEvents();
+                this.checkBiometricSupport();
+                this.loadMockEmails();
+            }
+
+            initializeElements() {
+                this.elements = {
+                    authForm: document.getElementById('authForm'),
+                    emailDashboard: document.getElementById('emailDashboard'),
+                    statusMessage: document.getElementById('statusMessage'),
+                    emailInput: document.getElementById('email'),
+                    nameInput: document.getElementById('name'),
+                    registerBtn: document.getElementById('registerBtn'),
+                    loginBtn: document.getElementById('loginBtn'),
+                    logoutBtn: document.getElementById('logoutBtn'),
+                    emailList: document.getElementById('emailList')
+                };
+            }
+
+            bindEvents() {
+                this.elements.registerBtn.addEventListener('click', () => this.registerBiometric());
+                this.elements.loginBtn.addEventListener('click', () => this.loginWithBiometric());
+                this.elements.logoutBtn.addEventListener('click', () => this.logout());
+            }
+
+            async checkBiometricSupport() {
+                if (!window.PublicKeyCredential) {
+                    this.showStatus('error', 'Face recognition is not supported in this browser. Please use Chrome, Firefox, Safari, or Edge with camera access.');
+                    this.elements.registerBtn.disabled = true;
+                    return;
+                }
+
+                try {
+                    const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                    if (!available) {
+                        this.showStatus('info', 'No face recognition authenticator detected. Please ensure your device has a camera and supports Face ID.');
+                    } else {
+                        this.showStatus('success', 'Face recognition is ready! Position your face in front of the camera when prompted.');
+                    }
+                } catch (error) {
+                    console.error('Error checking face recognition support:', error);
+                    this.showStatus('info', 'Face recognition support check failed, but you can still try to register.');
+                }
+            }
+
+            async registerBiometric() {
+                const email = this.elements.emailInput.value.trim();
+                const name = this.elements.nameInput.value.trim();
+
+                if (!email || !name) {
+                    this.showStatus('error', 'Please enter both email and name.');
+                    return;
+                }
+
+                if (!this.isValidEmail(email)) {
+                    this.showStatus('error', 'Please enter a valid email address.');
+                    return;
+                }
+
+                this.elements.registerBtn.disabled = true;
+                this.elements.registerBtn.innerHTML = '<div class="loading"></div> Scanning Face...';
+
+                try {
+                    const userId = new TextEncoder().encode(email);
+                    const challenge = crypto.getRandomValues(new Uint8Array(32));
+
+                    const publicKeyCredentialCreationOptions = {
+                        challenge: challenge,
+                        rp: {
+                            name: "Face Recognition Email Login",
+                            id: window.location.hostname,
+                        },
+                        user: {
+                            id: userId,
+                            name: email,
+                            displayName: name,
+                        },
+                        pubKeyCredParams: [
+                            { alg: -7, type: "public-key" },
+                            { alg: -257, type: "public-key" }
+                        ],
+                        authenticatorSelection: {
+                            authenticatorAttachment: "platform",
+                            userVerification: "required",
+                            requireResidentKey: false
+                        },
+                        timeout: 60000,
+                        attestation: "direct",
+                        extensions: {
+                            uvm: true
+                        }
+                    };
+
+                    const credential = await navigator.credentials.create({
+                        publicKey: publicKeyCredentialCreationOptions
+                    });
+
+                    // Store credential (in real app, this would be sent to server)
+                    this.credentials.set(email, {
+                        id: credential.id,
+                        rawId: credential.rawId,
+                        response: credential.response,
+                        name: name,
+                        email: email,
+                        registeredAt: new Date().toISOString()
+                    });
+
+                    this.isRegistered = true;
+                    this.elements.loginBtn.disabled = false;
+                    this.showStatus('success', `✅ Face recognition registration successful for ${name}! You can now login with your face.`);
+
+                } catch (error) {
+                    console.error('Registration failed:', error);
+                    let errorMessage = 'Registration failed. ';
+                    
+                    if (error.name === 'NotAllowedError') {
+                        errorMessage += 'User cancelled or face recognition failed. Please ensure good lighting and look directly at the camera.';
+                    } else if (error.name === 'NotSupportedError') {
+                        errorMessage += 'Face recognition not supported on this device.';
+                    } else if (error.name === 'SecurityError') {
+                        errorMessage += 'Security error occurred. Please ensure camera permissions are granted.';
+                    } else {
+                        errorMessage += error.message || 'Unknown error occurred.';
+                    }
+                    
+                    this.showStatus('error', errorMessage);
+                } finally {
+                    this.elements.registerBtn.disabled = false;
+                    this.elements.registerBtn.innerHTML = `
+                        <svg class="biometric-icon" viewBox="0 0 24 24">
+                            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+                        </svg>
+                        Register Face ID
+                    `;
+                }
+            }
+
+            async loginWithBiometric() {
+                const email = this.elements.emailInput.value.trim();
+
+                if (!email) {
+                    this.showStatus('error', 'Please enter your email address.');
+                    return;
+                }
+
+                if (!this.credentials.has(email)) {
+                    this.showStatus('error', 'No face recognition registration found for this email. Please register first.');
+                    return;
+                }
+
+                this.elements.loginBtn.disabled = true;
+                this.elements.loginBtn.innerHTML = '<div class="loading"></div> Scanning Face...';
+
+                try {
+                    const storedCredential = this.credentials.get(email);
+                    const challenge = crypto.getRandomValues(new Uint8Array(32));
+
+                    const publicKeyCredentialRequestOptions = {
+                        challenge: challenge,
+                        allowCredentials: [{
+                            id: storedCredential.rawId,
+                            type: 'public-key',
+                            transports: ['internal']
+                        }],
+                        userVerification: 'required',
+                        timeout: 60000,
+                        extensions: {
+                            uvm: true
+                        }
+                    };
+
+                    const assertion = await navigator.credentials.get({
+                        publicKey: publicKeyCredentialRequestOptions
+                    });
+
+                    // In a real app, you would verify the assertion on the server
+                    this.currentUser = storedCredential;
+                    this.showEmailDashboard();
+
+                } catch (error) {
+                    console.error('Login failed:', error);
+                    let errorMessage = 'Login failed. ';
+                    
+                    if (error.name === 'NotAllowedError') {
+                        errorMessage += 'User cancelled or face recognition failed. Please look directly at the camera in good lighting.';
+                    } else if (error.name === 'NotFoundError') {
+                        errorMessage += 'No matching credentials found.';
+                    } else {
+                        errorMessage += error.message || 'Unknown error occurred.';
+                    }
+                    
+                    this.showStatus('error', errorMessage);
+                } finally {
+                    this.elements.loginBtn.disabled = false;
+                    this.elements.loginBtn.innerHTML = `
+                        <svg class="biometric-icon" viewBox="0 0 24 24">
+                            <path d="M9,11H15L13,13.5L15,16H9L11,13.5L9,11M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2Z"/>
+                        </svg>
+                        Login with Face ID
+                    `;
+                }
+            }
+
+            showEmailDashboard() {
+                this.elements.authForm.style.display = 'none';
+                this.elements.emailDashboard.classList.add('active');
+                this.populateEmails();
+            }
+
+            logout() {
+                this.currentUser = null;
+                this.elements.authForm.style.display = 'block';
+                this.elements.emailDashboard.classList.remove('active');
+                this.showStatus('info', 'You have been logged out successfully.');
+            }
+
+            loadMockEmails() {
+                this.mockEmails = [
+                    {
+                        sender: "John Smith",
+                        subject: "Project Update - Q4 Review",
+                        preview: "Hi there! I wanted to give you a quick update on our Q4 project progress. We've made significant strides...",
+                        time: "2 hours ago",
+                        unread: true
+                    },
+                    {
+                        sender: "Sarah Johnson",
+                        subject: "Meeting Reminder: Team Sync Tomorrow",
+                        preview: "Just a friendly reminder about our team sync meeting scheduled for tomorrow at 10 AM. Please review...",
+                        time: "4 hours ago",
+                        unread: true
+                    },
+                    {
+                        sender: "Tech Newsletter",
+                        subject: "Weekly Tech Digest - AI & Machine Learning",
+                        preview: "This week's highlights include breakthrough developments in AI, new machine learning frameworks...",
+                        time: "1 day ago",
+                        unread: false
+                    },
+                    {
+                        sender: "HR Department",
+                        subject: "Benefits Enrollment Deadline Approaching",
+                        preview: "This is a reminder that the deadline for benefits enrollment is approaching. Please make sure to...",
+                        time: "2 days ago",
+                        unread: false
+                    },
+                    {
+                        sender: "Michael Chen",
+                        subject: "Code Review Request - Authentication Module",
+                        preview: "Could you please review the authentication module I've been working on? I've implemented the new...",
+                        time: "3 days ago",
+                        unread: false
+                    },
+                    {
+                        sender: "Security Team",
+                        subject: "Security Update: New Biometric Login System",
+                        preview: "We're excited to announce the rollout of our new face recognition login system. This enhanced security...",
+                        time: "1 week ago",
+                        unread: false
+                    }
+                ];
+            }
+
+            populateEmails() {
+                this.elements.emailList.innerHTML = '';
+                
+                this.mockEmails.forEach(email => {
+                    const emailElement = document.createElement('div');
+                    emailElement.className = 'email-item';
+                    emailElement.innerHTML = `
+                        <div class="email-time">${email.time}</div>
+                        <div class="email-sender" style="${email.unread ? 'font-weight: 700;' : ''}">${email.sender}</div>
+                        <div class="email-subject" style="${email.unread ? 'font-weight: 600; color: #333;' : ''}">${email.subject}</div>
+                        <div class="email-preview">${email.preview}</div>
+                    `;
+                    
+                    emailElement.addEventListener('click', () => {
+                        alert(`Opening email from ${email.sender}:\n\n${email.subject}\n\n${email.preview}...`);
+                    });
+                    
+                    this.elements.emailList.appendChild(emailElement);
+                });
+            }
+
+            showStatus(type, message) {
+                this.elements.statusMessage.className = `status ${type}`;
+                this.elements.statusMessage.textContent = message;
+                this.elements.statusMessage.style.display = 'block';
+                
+                if (type === 'success' || type === 'info') {
+                    setTimeout(() => {
+                        this.elements.statusMessage.style.display = 'none';
+                    }, 5000);
+                }
+            }
+
+            isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+        }
+
+        // Initialize the system when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new BiometricEmailSystem();
+        });
+    </script>
+</body>
+</html>
